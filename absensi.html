@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi Desa Sijenggung</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
+    <style>
+        :root {
+            --primary: #1a365d; /* Navy Blue */
+            --secondary: #d4af37; /* Gold */
+            --success: #28a745;
+            --bg-light: #f8f9fa; /* Putih Tulang */
+            --text-dark: #333;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; justify: center; }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            margin: auto;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--secondary);
+        }
+
+        .header-title h1 { font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
+        .header-title p { font-size: 11px; opacity: 0.8; }
+
+        /* User Profile Card */
+        .user-card {
+            margin: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+
+        .avatar { width: 50px; height: 50px; background: #ddd; border-radius: 50%; overflow: hidden; }
+
+        .user-info h2 { font-size: 15px; color: var(--primary); }
+        .user-info p { font-size: 12px; color: #666; }
+
+        /* Camera Area */
+        .camera-section {
+            margin: 0 15px;
+            background: #000;
+            height: 250px;
+            border-radius: 15px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 3px solid #eee;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border: 2px dashed rgba(255,255,255,0.5);
+            border-radius: 50%;
+        }
+
+        .location-tag {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            font-size: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        /* Status & Buttons */
+        .status-bar {
+            margin: 15px;
+            padding: 10px;
+            background: #e7f3ef;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--success);
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .btn-absensi {
+            display: block;
+            width: calc(100% - 30px);
+            margin: 0 15px;
+            padding: 15px;
+            background: var(--success);
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Recap Preview */
+        .recap-preview {
+            margin: 20px 15px;
+        }
+
+        .recap-preview h3 { font-size: 14px; margin-bottom: 10px; border-left: 4px solid var(--secondary); padding-left: 8px; }
+
+        .recap-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px inset #f0f0f0;
+            font-size: 13px;
+        }
+
+        /* Bottom Nav */
+        nav.bottom-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            background: white;
+            border-top: 1px solid #eee;
+            padding: 10px 0;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            color: #999;
+            font-size: 10px;
+        }
+
+        .nav-item.active { color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <div class="header-title">
+            <h1>PEMERINTAH DESA SIJENGGUNG</h1>
+            <p>Kec. Banjarmangu, Kab. Banjarnegara</p>
+        </div>
+    </header>
+
+    <div class="user-card">
+        <div class="avatar"><img src="https://via.placeholder.com/50" alt="user"></div>
+        <div class="user-info">
+            <h2>BUDI SANTOSO</h2>
+            <p>Kaur Keuangan | NIPD: 19850122...</p>
+        </div>
+    </div>
+
+    <div class="camera-section">
+        <div class="camera-overlay"></div>
+        <div style="color: white; font-size: 12px; z-index: 1;">[ KAMERA LIVE AKTIF ]</div>
+        <div class="location-tag">
+            GPS: -7.3695, 109.6812 (Kantor Desa Sijenggung)
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <i data-lucide="check-circle-2" size="18"></i>
+        TERKUNCI DI AREA KANTOR
+    </div>
+
+    <button class="btn-absensi">AMBIL FOTO & ABSEN MASUK</button>
+
+    <div class="recap-preview">
+        <h3>REKAP HARI INI</h3>
+        <div class="recap-item">
+            <span>Kamis, 26 Maret 2026</span>
+            <strong>07:15:22 WIB</strong>
+        </div>
+        <div class="recap-item">
+            <span>Status</span>
+            <span style="color: var(--success)">Tepat Waktu</span>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active">
+            <i data-lucide="home"></i><br>Beranda
+        </div>
+        <div class="nav-item">
+            <i data-lucide="calendar"></i><br>Rekap
+        </div>
+        <div class="nav-item">
+            <i data-lucide="user"></i><br>Profil
+        </div>
+        <div class="nav-item">
+            <i data-lucide="bell"></i><br>Info
+        </div>
+    </nav>
+</div>
+
+<script>
+    // Inisialisasi Ikon Lucide
+    lucide.createIcons();
+</script>
+
+</body>
+</html>

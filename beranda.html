@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sijenggung Digital v3</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --nav-bg: #1e293b;
+            --accent: #06b6d4;
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body { background: var(--bg-dark); color: white; display: flex; justify-content: center; min-height: 100vh; }
+
+        .app-container {
+            width: 100%; max-width: 414px;
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            min-height: 100vh; position: relative;
+            padding-bottom: 100px; overflow-y: auto; overflow-x: hidden;
+        }
+
+        /* --- Page Management --- */
+        .page { display: none; padding: 20px; animation: fadeIn 0.4s ease-out; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Beranda: Statistik & Konten --- */
+        .header-home { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .header-home h2 { font-size: 20px; font-weight: 700; }
+        .header-home p { font-size: 12px; color: var(--accent); }
+
+        /* Card Statistik Kehadiran */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: var(--glass); border: 1px solid var(--glass-border); padding: 15px; border-radius: 20px; text-align: center; }
+        .stat-card h4 { font-size: 11px; opacity: 0.6; margin-bottom: 5px; text-transform: uppercase; }
+        .stat-card p { font-size: 20px; font-weight: 700; color: var(--accent); }
+
+        /* Mini Chart (Statistik Mingguan) */
+        .chart-container { background: var(--glass); border: 1px solid var(--glass-border); padding: 20px; border-radius: 24px; margin-bottom: 20px; }
+        .chart-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; font-weight: 600; }
+        .bar-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 100px; gap: 8px; }
+        .bar-item { flex: 1; background: var(--primary); border-radius: 4px; transition: 0.5s; position: relative; }
+        .bar-item span { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 9px; opacity: 0.5; }
+
+        /* Today's Log */
+        .log-today { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 15px; margin-bottom: 20px; }
+        .log-row { display: flex; align-items: center; gap: 15px; padding: 10px 0; }
+        .log-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(6,182,212,0.1); color: var(--accent); }
+        .log-info h5 { font-size: 13px; }
+        .log-info p { font-size: 11px; opacity: 0.6; }
+
+        /* --- Absensi Page --- */
+        .camera-wrapper { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 30px; position: relative; overflow: hidden; border: 2px solid var(--glass-border); }
+        #video-feed { width: 100%; height: 100%; object-fit: cover; }
+        .laser { position: absolute; width: 100%; height: 2px; background: var(--accent); box-shadow: 0 0 15px var(--accent); top: 0; animation: scan 3s infinite; }
+        @keyframes scan { 0%, 100% { top: 0%; } 50% { top: 100%; } }
+
+        /* --- Profil Page --- */
+        .profile-top { text-align: center; margin-bottom: 25px; padding-top: 20px; }
+        .avatar-lg { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--accent); margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 40px; background: var(--nav-bg); }
+        .info-box { background: var(--glass); border-radius: 20px; padding: 5px 20px; border: 1px solid var(--glass-border); }
+        .info-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--glass-border); font-size: 14px; }
+
+        /* --- Bottom Nav (Gaya Melengkung Sesuai Gambar) --- */
+        .nav-dock {
+            position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px;
+            background: var(--nav-bg); border-radius: 28px; display: flex; 
+            justify-content: space-around; align-items: center; z-index: 100;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 1px solid var(--glass-border);
+        }
+        .nav-btn { text-align: center; color: rgba(255,255,255,0.4); font-size: 10px; cursor: pointer; flex: 1; transition: 0.3s; }
+        .nav-btn.active { color: white; font-weight: 700; }
+        .floating-action {
+            position: absolute; top: -35px; left: 50%; transform: translateX(-50%);
+            width: 75px; height: 75px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: 6px solid var(--bg-dark); display: flex; align-items: center; justify-content: center;
+            color: white; box-shadow: 0 8px 20px rgba(6,182,212,0.4); cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <div id="beranda" class="page active">
+        <div class="header-home">
+            <div>
+                <p>Selamat Pagi,</p>
+                <h2>Budi Santoso</h2>
+            </div>
+            <div style="background: var(--glass); padding: 8px; border-radius: 12px;">
+                <i data-lucide="bell" size="20"></i>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h4>Hadir Bln Ini</h4>
+                <p>22 Hari</p>
+            </div>
+            <div class="stat-card">
+                <h4>Rata Jam</h4>
+                <p>07.5j</p>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <span>Statistik Kehadiran</span>
+                <span style="color: var(--accent); font-size: 12px;">Pekan Ini</span>
+            </div>
+            <div class="bar-chart">
+                <div class="bar-item" style="height: 80%;"><span>Sen</span></div>
+                <div class="bar-item" style="height: 95%;"><span>Sel</span></div>
+                <div class="bar-item" style="height: 70%;"><span>Rab</span></div>
+                <div class="bar-item" style="height: 100%; background: var(--accent);"><span>Kam</span></div>
+                <div class="bar-item" style="height: 85%;"><span>Jum</span></div>
+                <div class="bar-item" style="height: 40%; opacity: 0.3;"><span>Sab</span></div>
+            </div>
+        </div>
+
+        <h4 style="font-size: 14px; margin-bottom: 12px; opacity: 0.8;">Aktifitas Hari Ini</h4>
+        <div class="log-today">
+            <div class="log-row">
+                <div class="log-icon"><i data-lucide="log-in" size="18"></i></div>
+                <div class="log-info">
+                    <h5>Absen Masuk</h5>
+                    <p>Kamis, 26 Maret • 07:15 WIB</p>
+                </div>
+                <div style="margin-left: auto; color: var(--success); font-size: 12px;">Tepat Waktu</div>
+            </div>
+            <div style="height: 1px; background: var(--glass-border); margin: 5px 0;"></div>
+            <div class="log-row" style="opacity: 0.5;">
+                <div class="log-icon"><i data-lucide="log-out" size="18"></i></div>
+                <div class="log-info">
+                    <h5>Absen Pulang</h5>
+                    <p>Belum tercatat</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="absensi" class="page">
+        <h2 style="text-align:center; margin-bottom: 20px;">Presensi Live</h2>
+        <div class="camera-wrapper">
+            <video id="video-feed" autoplay playsinline></video>
+            <div class="laser"></div>
+        </div>
+        <center>
+            <div style="margin-top: 25px; background: rgba(34,197,94,0.1); padding: 10px 20px; border-radius: 100px; display: inline-flex; align-items: center; gap: 10px; color: var(--success); border: 1px solid rgba(34,197,94,0.3);">
+                <div style="width:8px; height:8px; background: var(--success); border-radius:50%"></div>
+                <span style="font-size: 12px; font-weight: 700;">GPS: AREA KANTOR SIJENGGUNG</span>
+            </div>
+            <button id="snap" style="margin-top: 20px; width: 100%; padding: 18px; border-radius: 20px; background: linear-gradient(to right, var(--primary), var(--accent)); border: none; color: white; font-weight: 700; font-size: 16px;">KONFIRMASI KEHADIRAN</button>
+        </center>
+    </div>
+
+    <div id="profil" class="page">
+        <div class="profile-top">
+            <div class="avatar-lg">👤</div>
+            <h2>Budi Santoso</h2>
+            <p style="color: var(--accent); font-size: 14px;">Kaur Keuangan</p>
+        </div>
+        <div class="info-box">
+            <div class="info-item"><span>NIPD</span> <strong>198501222011011003</strong></div>
+            <div class="info-item"><span>Jabatan</span> <strong>Kaur Keuangan</strong></div>
+            <div class="info-item"><span>Desa</span> <strong>Sijenggung</strong></div>
+            <div class="info-item"><span>Kecamatan</span> <strong>Banjarmangu</strong></div>
+            <div class="info-item" style="border:none"><span>Versi App</span> <strong style="opacity:0.5">3.0.1-Beta</strong></div>
+        </div>
+        <button style="width:100%; margin-top:20px; padding:15px; border-radius:15px; background: rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.2); font-weight:600;">LOGOUT</button>
+    </div>
+
+    <div class="nav-dock">
+        <div class="nav-btn active" onclick="showPage('beranda', this)">
+            <i data-lucide="home"></i><br>Beranda
+        </div>
+        <div class="nav-btn" onclick="showPage('riwayat', this)">
+            <i data-lucide="calendar"></i><br>Riwayat
+        </div>
+        
+        <div class="floating-action" onclick="showPage('absensi', this)">
+            <i data-lucide="camera" size="30"></i>
+        </div>
+
+        <div class="nav-btn" style="margin-left: 60px;" onclick="showPage('pesan', this)">
+            <i data-lucide="message-circle"></i><br>Pesan
+        </div>
+        <div class="nav-btn" onclick="showPage('profil', this)">
+            <i data-lucide="user"></i><br>Profil
+        </div>
+    </div>
+
+</div>
+
+<script>
+    lucide.createIcons();
+
+    function showPage(id, btn) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById(id).classList.add('active');
+        if(btn && btn.classList.contains('nav-btn')) btn.classList.add('active');
+
+        if(id === 'absensi') startCam();
+    }
+
+    async function startCam() {
+        const video = document.getElementById('video-feed');
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            video.srcObject = stream;
+        } catch (e) { console.error("Kamera Error"); }
+    }
+
+    document.getElementById('snap').addEventListener('click', () => {
+        alert("✅ Absensi Berhasil!\nFoto dan lokasi telah terkirim ke server Desa Sijenggung.");
+        showPage('beranda');
+    });
+</script>
+
+</body>
+</html>

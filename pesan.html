@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sijenggung Digital - Pesan</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --nav-bg: #1e293b;
+            --accent: #06b6d4;
+            --primary: #3b82f6;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --unread: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-dark); color: white; display: flex; justify-content: center; min-height: 100vh; }
+
+        .app-container {
+            width: 100%; max-width: 414px;
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            min-height: 100vh; position: relative;
+            padding-bottom: 110px; overflow-y: auto;
+        }
+
+        .page { display: none; padding: 20px; animation: fadeIn 0.4s ease-out; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Halaman Pesan (Chat List) --- */
+        .msg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .msg-list { display: flex; flex-direction: column; gap: 8px; }
+        
+        .msg-item {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 15px;
+            border-radius: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .msg-item:active { background: rgba(255,255,255,0.1); }
+
+        .msg-avatar {
+            width: 50px; height: 50px;
+            border-radius: 15px;
+            background: var(--nav-bg);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent);
+            position: relative;
+        }
+        .unread-dot {
+            position: absolute; top: -2px; right: -2px;
+            width: 12px; height: 12px; background: var(--unread);
+            border-radius: 50%; border: 2px solid var(--bg-dark);
+        }
+
+        .msg-content { flex: 1; overflow: hidden; }
+        .msg-content h5 { font-size: 14px; margin-bottom: 4px; display: flex; justify-content: space-between; }
+        .msg-content h5 span { font-size: 10px; opacity: 0.5; font-weight: 400; }
+        .msg-content p { font-size: 12px; opacity: 0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* --- Nav Dock --- */
+        .nav-dock {
+            position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px;
+            background: var(--nav-bg); border-radius: 28px; display: flex; 
+            justify-content: space-around; align-items: center; z-index: 100;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 1px solid var(--glass-border);
+        }
+        .nav-btn { text-align: center; color: rgba(255,255,255,0.4); font-size: 10px; cursor: pointer; flex: 1; transition: 0.3s; }
+        .nav-btn.active { color: white; font-weight: 700; }
+        .floating-action {
+            position: absolute; top: -35px; left: 50%; transform: translateX(-50%);
+            width: 75px; height: 75px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: 6px solid var(--bg-dark); display: flex; align-items: center; justify-content: center;
+            color: white; box-shadow: 0 8px 20px rgba(6, 182, 212, 0.4); cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <div id="beranda" class="page active">
+        <h2>Beranda</h2>
+        <p style="opacity:0.6; font-size:14px;">Selamat datang kembali di Sijenggung Digital.</p>
+    </div>
+
+    <div id="riwayat" class="page">
+        <h3>Riwayat Absensi</h3>
+        <p style="opacity:0.6; font-size:14px; margin-top:20px;">Daftar riwayat kehadiran Anda.</p>
+    </div>
+
+    <div id="pesan" class="page">
+        <div class="msg-header">
+            <h3>Kotak Masuk</h3>
+            <i data-lucide="search" size="20" style="opacity:0.6"></i>
+        </div>
+
+        <div class="msg-list">
+            <div class="msg-item">
+                <div class="msg-avatar">
+                    <i data-lucide="megaphone"></i>
+                    <div class="unread-dot"></div>
+                </div>
+                <div class="msg-content">
+                    <h5>Kepala Desa <span>10:25</span></h5>
+                    <p>Mohon kehadirannya untuk rapat koordinasi pembangunan jembatan Sigeblog besok pagi jam 09.00.</p>
+                </div>
+            </div>
+
+            <div class="msg-item">
+                <div class="msg-avatar">
+                    <i data-lucide="info"></i>
+                </div>
+                <div class="msg-content">
+                    <h5>Sistem Absensi <span>07:15</span></h5>
+                    <p>Presensi masuk Anda pada Kamis, 26 Maret 2026 telah berhasil diverifikasi.</p>
+                </div>
+            </div>
+
+            <div class="msg-item">
+                <div class="msg-avatar">
+                    <i data-lucide="user-check"></i>
+                </div>
+                <div class="msg-content">
+                    <h5>Sekdes <span>Kemarin</span></h5>
+                    <p>Data rekapitulasi jam kerja bulan Februari sudah saya terima, terima kasih Pak Budi.</p>
+                </div>
+            </div>
+
+            <div class="msg-item" style="opacity: 0.7;">
+                <div class="msg-avatar">
+                    <i data-lucide="mail-warning"></i>
+                </div>
+                <div class="msg-content">
+                    <h5>Pemerintah Kab. <span>Senin</span></h5>
+                    <p>Undangan sosialisasi pengelolaan dana desa tingkat kabupaten Banjarnegara.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="absensi" class="page">
+        <h3 style="text-align: center; margin-bottom: 20px;">Ambil Presensi</h3>
+        <div style="width: 100%; aspect-ratio:1; background:#000; border-radius:30px; position:relative; overflow:hidden;">
+            <video id="video" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+            <div style="position:absolute; top:0; width:100%; height:2px; background:var(--accent); box-shadow:0 0 10px var(--accent); animation: scan 3s infinite;"></div>
+        </div>
+    </div>
+
+    <div id="profil" class="page">
+        <h3 style="text-align:center;">Profil Saya</h3>
+    </div>
+
+    <div class="nav-dock">
+        <div class="nav-btn" onclick="showPage('beranda', this)">
+            <i data-lucide="home"></i><br>Beranda
+        </div>
+        <div class="nav-btn" onclick="showPage('riwayat', this)">
+            <i data-lucide="calendar"></i><br>Riwayat
+        </div>
+        
+        <div class="floating-action" onclick="showPage('absensi', this)">
+            <i data-lucide="camera" size="30"></i>
+        </div>
+
+        <div class="nav-btn active" style="margin-left: 60px;" onclick="showPage('pesan', this)">
+            <i data-lucide="message-circle"></i><br>Pesan
+        </div>
+        <div class="nav-btn" onclick="showPage('profil', this)">
+            <i data-lucide="user"></i><br>Profil
+        </div>
+    </div>
+
+</div>
+
+<script>
+    lucide.createIcons();
+
+    function showPage(id, btn) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(btn && btn.classList.contains('nav-btn')) btn.classList.add('active');
+        if(id === 'absensi') startCam();
+    }
+
+    async function startCam() {
+        const video = document.getElementById('video');
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            video.srcObject = stream;
+        } catch (e) { console.log("Kamera error"); }
+    }
+</script>
+
+<style> @keyframes scan { 0%, 100% { top: 0%; } 50% { top: 100%; } } </style>
+</body>
+</html>

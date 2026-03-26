@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Sijenggung Digital</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo-section">
+            <i data-lucide="shield-check" color="#06b6d4"></i>
+            SIJENGGUNG ADM
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active" data-page="beranda.html"><i data-lucide="layout-dashboard" size="20"></i> Dashboard</li>
+            <li class="nav-item" data-page="absensi.html"><i data-lucide="camera" size="20"></i> Absensi</li>
+            <li class="nav-item" data-page="data perangkat.html"><i data-lucide="users" size="20"></i> Data Perangkat</li>
+            <li class="nav-item" data-page="pengaturan jam.html"><i data-lucide="clock" size="20"></i> Pengaturan Jam</li>
+            <li class="nav-item" data-page="laporan rekap.html"><i data-lucide="file-text" size="20"></i> Laporan Rekap</li>
+        </ul>
+        <div class="nav-item" style="margin-top: auto; color: #ef4444;" id="logout-button"><i data-lucide="log-out" size="20"></i> Keluar</div>
+    </aside>
+
+    <main class="main-content" id="main-content">
+        <!-- Konten dinamis akan dimuat di sini -->
+    </main>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>

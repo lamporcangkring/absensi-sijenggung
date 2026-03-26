@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Sijenggung Digital</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
+    <style>
+        :root {
+            --bg-body: #f1f5f9;
+            --sidebar: #1e293b;
+            --primary: #3b82f6;
+            --accent: #06b6d4;
+            --white: #ffffff;
+            --text-main: #334155;
+            --danger: #ef4444;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow: hidden; }
+
+        /* --- Sidebar --- */
+        .sidebar { width: 260px; background: var(--sidebar); color: white; padding: 25px; display: flex; flex-direction: column; }
+        .logo-area { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; font-weight: 700; color: var(--accent); }
+        .nav-menu { list-style: none; flex: 1; }
+        .nav-item { 
+            padding: 14px 18px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; 
+            display: flex; align-items: center; gap: 12px; transition: 0.3s; color: rgba(255,255,255,0.7);
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-item.active { background: rgba(255,255,255,0.1); color: var(--accent); font-weight: 600; }
+
+        /* --- Main Content --- */
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; height: 100vh; }
+        .content-page { display: none; animation: fadeIn 0.3s ease; }
+        .content-page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Components --- */
+        .header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .btn { padding: 10px 20px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-add { background: var(--primary); color: white; }
+        .btn-add:hover { background: #2563eb; }
+        
+        .card { background: var(--white); border-radius: 16px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        /* --- Table --- */
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; border-bottom: 2px solid #f1f5f9; font-size: 13px; color: #64748b; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+
+        /* --- Form --- */
+        .input-group { margin-bottom: 15px; }
+        .input-box { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #ddd; border-radius: 10px; outline: none; }
+        .input-box:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+
+        /* --- Modal --- */
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; }
+        .modal-body { background:white; padding:30px; border-radius:20px; width:400px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+
+        .spin { animation: rotate 2s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo-area">
+            <i data-lucide="shield-check"></i>
+            <span>SIJENGGUNG ADM</span>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active" onclick="switchPage('data-perangkat', this)">
+                <i data-lucide="users" size="18"></i> Data Perangkat
+            </li>
+            <li class="nav-item" onclick="switchPage('pengaturan-jam', this)">
+                <i data-lucide="clock" size="18"></i> Pengaturan Jam
+            </li>
+            <li class="nav-item" onclick="switchPage('laporan-rekap', this)">
+                <i data-lucide="file-text" size="18"></i> Laporan Rekap
+            </li>
+        </ul>
+        <div class="nav-item" style="color:var(--danger)" onclick="alert('Keluar Sistem...')">
+            <i data-lucide="log-out" size="18"></i> Keluar
+        </div>
+    </aside>
+
+    <main class="main-content">
+        
+        <div id="data-perangkat" class="content-page active">
+            <div class="header-action">
+                <div>
+                    <h1>Manajemen Perangkat Desa</h1>
+                    <p style="opacity:0.6; font-size:14px;">Kelola akun akses perangkat Desa Sijenggung.</p>
+                </div>
+                <button class="btn btn-add" onclick="openModal()">
+                    <i data-lucide="user-plus" size="18"></i> Tambah Perangkat
+                </button>
+            </div>
+
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama Lengkap</th>
+                            <th>NIPD</th>
+                            <th>Jabatan</th>
+                            <th style="text-align: right;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <tr id="row-1">
+                            <td><strong>Budi Santoso</strong></td>
+                            <td>12345</td>
+                            <td>Kaur Keuangan</td>
+                            <td align="right">
+                                <button onclick="hapusRow('row-1')" style="color:var(--danger); background:none; border:none; cursor:pointer;"><i data-lucide="trash-2" size="16"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="pengaturan-jam" class="content-page">
+            <div class="header-action">
+                <div>
+                    <h1>Konfigurasi Presensi</h1>
+                    <p style="opacity:0.6; font-size:14px;">Atur jam kerja dan lokasi kantor desa.</p>
+                </div>
+                <button class="btn btn-add" onclick="saveConfig(this)">
+                    <i data-lucide="save" size="18"></i> Simpan Pengaturan
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="card">
+                    <h3 style="margin-bottom:15px">Waktu Kerja</h3>
+                    <div class="input-group">
+                        <label style="font-size:12px; font-weight:600">Jam Masuk</label>
+                        <input type="time" id="jamMasuk" class="input-box" value="07:30">
+                    </div>
+                    <div class="input-group">
+                        <label style="font-size:12px; font-weight:600">Toleransi (Menit)</label>
+                        <input type="number" id="toleransi" class="input-box" value="15">
+                    </div>
+                    <div class="input-group">
+                        <label style="font-size:12px; font-weight:600">Jam Pulang</label>
+                        <input type="time" id="jamPulang" class="input-box" value="15:30">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom:15px">Titik Lokasi Kantor</h3>
+                    <div class="input-group">
+                        <label style="font-size:12px; font-weight:600">Latitude</label>
+                        <input type="text" id="lat" class="input-box" value="-7.382104">
+                    </div>
+                    <div class="input-group">
+                        <label style="font-size:12px; font-weight:600">Longitude</label>
+                        <input type="text" id="lng" class="input-box" value="109.658302">
+                    </div>
+                    <div class="input-group">
+                        <label style="font-size:12px; font-weight:600">Radius Absen (Meter)</label>
+                        <input type="number" id="radius" class="input-box" value="50">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="laporan-rekap" class="content-page">
+            <h1>Laporan Rekapitulasi</h1>
+            <p>Menu ini akan menampilkan histori absen bulanan.</p>
+        </div>
+
+    </main>
+
+    <div id="modalAdd" class="modal">
+        <div class="modal-body">
+            <h3>Tambah Perangkat Baru</h3>
+            <div style="margin-top:20px">
+                <label style="font-size:12px; font-weight:600">Nama Lengkap</label>
+                <input type="text" id="newName" class="input-box" placeholder="Nama">
+                
+                <label style="font-size:12px; font-weight:600; margin-top:10px; display:block">NIPD</label>
+                <input type="text" id="newNIPD" class="input-box" placeholder="NIPD">
+
+                <label style="font-size:12px; font-weight:600; margin-top:10px; display:block">Jabatan (Ketik Manual)</label>
+                <input type="text" id="newJab" class="input-box" placeholder="Contoh: Kaur Keuangan">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn btn-add" style="flex:1; justify-content:center" onclick="addUser()">Simpan Data</button>
+                <button class="btn" style="flex:1; background:#f1f5f9; justify-content:center" onclick="closeModal()">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Navigasi
+        function switchPage(pageId, element) {
+            document.querySelectorAll('.content-page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            element.classList.add('active');
+            lucide.createIcons();
+        }
+
+        // Modal Logic
+        function openModal() { document.getElementById('modalAdd').style.display = 'flex'; }
+        function closeModal() { 
+            document.getElementById('modalAdd').style.display = 'none'; 
+            document.getElementById('newName').value = "";
+            document.getElementById('newNIPD').value = "";
+            document.getElementById('newJab').value = "";
+        }
+
+        // Simpan User Baru
+        function addUser() {
+            const n = document.getElementById('newName').value;
+            const i = document.getElementById('newNIPD').value;
+            const j = document.getElementById('newJab').value;
+
+            if(!n || !i || !j) return alert("Mohon lengkapi data!");
+
+            const table = document.getElementById('userTableBody');
+            const rid = "row-" + Date.now();
+
+            const tr = `
+                <tr id="${rid}">
+                    <td><strong>${n}</strong></td>
+                    <td>${i}</td>
+                    <td>${j}</td>
+                    <td align="right">
+                        <button onclick="hapusRow('${rid}')" style="color:var(--danger); background:none; border:none; cursor:pointer;"><i data-lucide="trash-2" size="16"></i></button>
+                    </td>
+                </tr>`;
+            
+            table.insertAdjacentHTML('beforeend', tr);
+            lucide.createIcons();
+            closeModal();
+            alert("Data " + n + " Berhasil Disimpan!");
+        }
+
+        function hapusRow(id) {
+            if(confirm("Hapus data perangkat ini?")) document.getElementById(id).remove();
+        }
+
+        // Simpan Konfigurasi Jam & Lokasi
+        function saveConfig(btn) {
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Menyimpan...';
+            lucide.createIcons();
+
+            setTimeout(() => {
+                btn.innerHTML = original;
+                lucide.createIcons();
+                alert("✅ Pengaturan Berhasil Diperbarui!");
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

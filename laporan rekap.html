@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Sijenggung Digital</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
+    <style>
+        :root {
+            --bg-body: #f1f5f9;
+            --sidebar: #1e293b;
+            --primary: #3b82f6;
+            --accent: #06b6d4;
+            --white: #ffffff;
+            --text-main: #334155;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow: hidden; }
+
+        /* --- Sidebar --- */
+        .sidebar { width: 260px; background: var(--sidebar); color: white; padding: 25px; display: flex; flex-direction: column; }
+        .logo-area { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; font-weight: 700; color: var(--accent); }
+        .nav-menu { list-style: none; flex: 1; }
+        .nav-item { 
+            padding: 14px 18px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; 
+            display: flex; align-items: center; gap: 12px; transition: 0.3s; color: rgba(255,255,255,0.7);
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-item.active { background: rgba(255,255,255,0.1); color: var(--accent); font-weight: 600; }
+
+        /* --- Main Content --- */
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; height: 100vh; }
+        .content-page { display: none; animation: fadeIn 0.3s ease; }
+        .content-page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Components --- */
+        .header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .btn { padding: 10px 20px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-add { background: var(--primary); color: white; }
+        .btn-outline { background: white; border: 1px solid #ddd; color: var(--text-main); }
+        
+        .card { background: var(--white); border-radius: 16px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        /* --- Table --- */
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; border-bottom: 2px solid #f1f5f9; font-size: 13px; color: #64748b; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+
+        /* --- Badge Status --- */
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef9c3; color: #854d0e; }
+
+        /* --- Form --- */
+        .input-box { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #ddd; border-radius: 10px; outline: none; }
+
+        /* --- Modal --- */
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; }
+        .modal-body { background:white; padding:30px; border-radius:20px; width:400px; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo-area"><i data-lucide="shield-check"></i><span>SIJENGGUNG ADM</span></div>
+        <ul class="nav-menu">
+            <li class="nav-item" onclick="switchPage('data-perangkat', this)"><i data-lucide="users" size="18"></i> Data Perangkat</li>
+            <li class="nav-item" onclick="switchPage('pengaturan-jam', this)"><i data-lucide="clock" size="18"></i> Pengaturan Jam</li>
+            <li class="nav-item active" onclick="switchPage('laporan-rekap', this)"><i data-lucide="file-text" size="18"></i> Laporan Rekap</li>
+        </ul>
+        <div class="nav-item" style="color:var(--danger)" onclick="alert('Keluar Sistem...')"><i data-lucide="log-out" size="18"></i> Keluar</div>
+    </aside>
+
+    <main class="main-content">
+        
+        <div id="data-perangkat" class="content-page">
+            <div class="header-action">
+                <h1>Data Perangkat</h1>
+                <button class="btn btn-add" onclick="openModal()"><i data-lucide="user-plus" size="18"></i> Tambah</button>
+            </div>
+            <div class="card">
+                <table>
+                    <thead><tr><th>Nama</th><th>NIPD</th><th>Jabatan</th><th align="right">Aksi</th></tr></thead>
+                    <tbody id="userTableBody">
+                        <tr id="row-1"><td><strong>Budi Santoso</strong></td><td>12345</td><td>Kaur Keuangan</td><td align="right"><button onclick="hapusRow('row-1')" style="color:var(--danger); background:none; border:none; cursor:pointer;"><i data-lucide="trash-2" size="16"></i></button></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="pengaturan-jam" class="content-page">
+            <div class="header-action"><h1>Konfigurasi</h1><button class="btn btn-add" onclick="alert('Disimpan!')">Simpan</button></div>
+            <div class="card"><h3>Pengaturan Waktu & Lokasi Kantor</h3></div>
+        </div>
+
+        <div id="laporan-rekap" class="content-page active">
+            <div class="header-action">
+                <div>
+                    <h1>Rekap Presensi</h1>
+                    <p style="opacity:0.6; font-size:14px;">Histori kehadiran perangkat Desa Sijenggung.</p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-outline" onclick="alert('Memfilter data...')"><i data-lucide="filter" size="18"></i> Filter Bulan</button>
+                    <button class="btn btn-add" style="background:#10b981;" onclick="alert('Mendownload Excel...')">
+                        <i data-lucide="file-spreadsheet" size="18"></i> Ekspor Excel
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <table id="rekapTable">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Nama Perangkat</th>
+                            <th>Jam Masuk</th>
+                            <th>Jam Pulang</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>26/03/2026</td>
+                            <td><strong>Budi Santoso</strong></td>
+                            <td>07:15:22</td>
+                            <td>15:35:10</td>
+                            <td><span class="badge badge-success">TEPAT WAKTU</span></td>
+                        </tr>
+                        <tr>
+                            <td>26/03/2026</td>
+                            <td><strong>Siti Aminah</strong></td>
+                            <td>07:46:12</td>
+                            <td>15:30:05</td>
+                            <td><span class="badge badge-warning">TERLAMBAT</span></td>
+                        </tr>
+                        <tr>
+                            <td>25/03/2026</td>
+                            <td><strong>Agus Prayitno</strong></td>
+                            <td>07:20:01</td>
+                            <td>15:40:00</td>
+                            <td><span class="badge badge-success">TEPAT WAKTU</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div id="modalAdd" class="modal"><div class="modal-body">
+        <h3>Tambah Perangkat</h3>
+        <input type="text" id="newName" class="input-box" placeholder="Nama">
+        <input type="text" id="newNIPD" class="input-box" placeholder="NIPD" style="margin-top:10px">
+        <input type="text" id="newJab" class="input-box" placeholder="Jabatan" style="margin-top:10px">
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn btn-add" style="flex:1" onclick="addUser()">Simpan</button>
+            <button class="btn" style="flex:1; background:#eee" onclick="closeModal()">Batal</button>
+        </div>
+    </div></div>
+
+    <script>
+        lucide.createIcons();
+        function switchPage(pageId, element) {
+            document.querySelectorAll('.content-page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            element.classList.add('active');
+            lucide.createIcons();
+        }
+        function openModal() { document.getElementById('modalAdd').style.display = 'flex'; }
+        function closeModal() { 
+            document.getElementById('modalAdd').style.display = 'none'; 
+            document.getElementById('newName').value = ""; document.getElementById('newNIPD').value = ""; document.getElementById('newJab').value = "";
+        }
+        function addUser() {
+            const n = document.getElementById('newName').value; const i = document.getElementById('newNIPD').value; const j = document.getElementById('newJab').value;
+            if(!n || !i || !j) return alert("Isi semua!");
+            const table = document.getElementById('userTableBody');
+            const rid = "row-" + Date.now();
+            table.insertAdjacentHTML('beforeend', `<tr id="${rid}"><td><strong>${n}</strong></td><td>${i}</td><td>${j}</td><td align="right"><button onclick="hapusRow('${rid}')" style="color:var(--danger); background:none; border:none; cursor:pointer;"><i data-lucide="trash-2" size="16"></i></button></td></tr>`);
+            lucide.createIcons(); closeModal();
+        }
+        function hapusRow(id) { if(confirm("Hapus?")) document.getElementById(id).remove(); }
+    </script>
+</body>
+</html>
