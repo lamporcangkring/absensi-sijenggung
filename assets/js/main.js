@@ -16,9 +16,11 @@ function checkSession() {
 }
 
 // Inisialisasi Lucide Icons jika ada
-if (typeof lucide !== 'undefined') {
-    lucide.createIcons();
-}
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+});
 
 async function handleLogin() {
     const nipd = document.getElementById('nipd').value;

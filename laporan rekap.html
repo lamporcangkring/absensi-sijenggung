@@ -33,8 +33,15 @@
         .nav-item.active { background: rgba(255,255,255,0.1); color: var(--accent); font-weight: 600; }
 
         /* --- Mobile Toggle --- */
-        .mobile-header { display: none; background: var(--sidebar); color: white; padding: 15px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1100; }
-        .menu-toggle { background: none; border: none; color: white; cursor: pointer; }
+        .mobile-header { 
+            display: none; background: var(--sidebar); color: white; padding: 15px 20px; 
+            align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1100;
+            min-height: 60px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .menu-toggle { 
+            background: none; border: none; color: white; cursor: pointer; 
+            padding: 8px; display: flex; align-items: center; justify-content: center;
+        }
 
         /* --- Main Content --- */
         .main-content { flex: 1; padding: 30px; overflow-y: auto; height: 100vh; transition: 0.3s; }
@@ -75,11 +82,11 @@
 
     <header class="mobile-header">
         <div class="logo-area" style="margin-bottom: 0;">
-            <i data-lucide="shield-check"></i>
+            <i data-lucide="shield-check" color="#06b6d4" size="24"></i>
             <span>SIJENGGUNG ADM</span>
         </div>
-        <button class="menu-toggle" onclick="toggleSidebar()">
-            <i data-lucide="menu"></i>
+        <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle Menu">
+            <i data-lucide="menu" size="28" style="color: white;"></i>
         </button>
     </header>
 
