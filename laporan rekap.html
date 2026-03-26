@@ -69,35 +69,16 @@
     <aside class="sidebar">
         <div class="logo-area"><i data-lucide="shield-check"></i><span>SIJENGGUNG ADM</span></div>
         <ul class="nav-menu">
-            <li class="nav-item" onclick="switchPage('data-perangkat', this)"><i data-lucide="users" size="18"></i> Data Perangkat</li>
-            <li class="nav-item" onclick="switchPage('pengaturan-jam', this)"><i data-lucide="clock" size="18"></i> Pengaturan Jam</li>
-            <li class="nav-item active" onclick="switchPage('laporan-rekap', this)"><i data-lucide="file-text" size="18"></i> Laporan Rekap</li>
+            <li class="nav-item" onclick="window.location.href='dashboard admin.html'"><i data-lucide="layout-dashboard" size="18"></i> Dashboard</li>
+            <li class="nav-item" onclick="window.location.href='data perangkat.html'"><i data-lucide="users" size="18"></i> Data Perangkat</li>
+            <li class="nav-item" onclick="window.location.href='pengaturan jam.html'"><i data-lucide="clock" size="18"></i> Pengaturan Jam</li>
+            <li class="nav-item active" onclick="window.location.href='laporan rekap.html'"><i data-lucide="file-text" size="18"></i> Laporan Rekap</li>
         </ul>
-        <div class="nav-item" style="color:var(--danger)" onclick="alert('Keluar Sistem...')"><i data-lucide="log-out" size="18"></i> Keluar</div>
+        <div class="nav-item" style="color:var(--danger)" onclick="handleLogout()"><i data-lucide="log-out" size="18"></i> Keluar</div>
     </aside>
 
     <main class="main-content">
         
-        <div id="data-perangkat" class="content-page">
-            <div class="header-action">
-                <h1>Data Perangkat</h1>
-                <button class="btn btn-add" onclick="openModal()"><i data-lucide="user-plus" size="18"></i> Tambah</button>
-            </div>
-            <div class="card">
-                <table>
-                    <thead><tr><th>Nama</th><th>NIPD</th><th>Jabatan</th><th align="right">Aksi</th></tr></thead>
-                    <tbody id="userTableBody">
-                        <tr id="row-1"><td><strong>Budi Santoso</strong></td><td>12345</td><td>Kaur Keuangan</td><td align="right"><button onclick="hapusRow('row-1')" style="color:var(--danger); background:none; border:none; cursor:pointer;"><i data-lucide="trash-2" size="16"></i></button></td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="pengaturan-jam" class="content-page">
-            <div class="header-action"><h1>Konfigurasi</h1><button class="btn btn-add" onclick="alert('Disimpan!')">Simpan</button></div>
-            <div class="card"><h3>Pengaturan Waktu & Lokasi Kantor</h3></div>
-        </div>
-
         <div id="laporan-rekap" class="content-page active">
             <div class="header-action">
                 <div>
@@ -119,31 +100,13 @@
                             <th>Tanggal</th>
                             <th>Nama Perangkat</th>
                             <th>Jam Masuk</th>
-                            <th>Jam Pulang</th>
                             <th>Status</th>
+                            <th align="right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="rekapTableBody">
                         <tr>
-                            <td>26/03/2026</td>
-                            <td><strong>Budi Santoso</strong></td>
-                            <td>07:15:22</td>
-                            <td>15:35:10</td>
-                            <td><span class="badge badge-success">TEPAT WAKTU</span></td>
-                        </tr>
-                        <tr>
-                            <td>26/03/2026</td>
-                            <td><strong>Siti Aminah</strong></td>
-                            <td>07:46:12</td>
-                            <td>15:30:05</td>
-                            <td><span class="badge badge-warning">TERLAMBAT</span></td>
-                        </tr>
-                        <tr>
-                            <td>25/03/2026</td>
-                            <td><strong>Agus Prayitno</strong></td>
-                            <td>07:20:01</td>
-                            <td>15:40:00</td>
-                            <td><span class="badge badge-success">TEPAT WAKTU</span></td>
+                            <td colspan="5" style="text-align:center">Memuat data...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -151,40 +114,48 @@
         </div>
     </main>
 
-    <div id="modalAdd" class="modal"><div class="modal-body">
-        <h3>Tambah Perangkat</h3>
-        <input type="text" id="newName" class="input-box" placeholder="Nama">
-        <input type="text" id="newNIPD" class="input-box" placeholder="NIPD" style="margin-top:10px">
-        <input type="text" id="newJab" class="input-box" placeholder="Jabatan" style="margin-top:10px">
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn btn-add" style="flex:1" onclick="addUser()">Simpan</button>
-            <button class="btn" style="flex:1; background:#eee" onclick="closeModal()">Batal</button>
-        </div>
-    </div></div>
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/main.js"></script>
     <script>
-        lucide.createIcons();
-        function switchPage(pageId, element) {
-            document.querySelectorAll('.content-page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            element.classList.add('active');
+        window.addEventListener('load', async () => {
+            const user = checkSession();
+            if (user && user.role === 'admin') {
+                loadFullRekap();
+            } else if (user) {
+                window.location.href = 'profil.html';
+            }
+        });
+
+        async function loadFullRekap() {
+            const { data, error } = await sb_client
+                .from('presensi')
+                .select('*, perangkat(nama)')
+                .order('tanggal', { ascending: false })
+                .order('jam_masuk', { ascending: false });
+
+            const tbody = document.getElementById('rekapTableBody');
+            if (error || !data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Belum ada data absensi.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach(log => {
+                const statusClass = log.status === 'Tepat Waktu' ? 'badge-success' : 'badge-warning';
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td>${log.tanggal}</td>
+                        <td><strong>${log.perangkat.nama}</strong></td>
+                        <td>${log.jam_masuk}</td>
+                        <td><span class="badge ${statusClass}">${log.status.toUpperCase()}</span></td>
+                        <td align="right">
+                            <i data-lucide="eye" size="16" style="cursor:pointer"></i>
+                        </td>
+                    </tr>
+                `);
+            });
             lucide.createIcons();
         }
-        function openModal() { document.getElementById('modalAdd').style.display = 'flex'; }
-        function closeModal() { 
-            document.getElementById('modalAdd').style.display = 'none'; 
-            document.getElementById('newName').value = ""; document.getElementById('newNIPD').value = ""; document.getElementById('newJab').value = "";
-        }
-        function addUser() {
-            const n = document.getElementById('newName').value; const i = document.getElementById('newNIPD').value; const j = document.getElementById('newJab').value;
-            if(!n || !i || !j) return alert("Isi semua!");
-            const table = document.getElementById('userTableBody');
-            const rid = "row-" + Date.now();
-            table.insertAdjacentHTML('beforeend', `<tr id="${rid}"><td><strong>${n}</strong></td><td>${i}</td><td>${j}</td><td align="right"><button onclick="hapusRow('${rid}')" style="color:var(--danger); background:none; border:none; cursor:pointer;"><i data-lucide="trash-2" size="16"></i></button></td></tr>`);
-            lucide.createIcons(); closeModal();
-        }
-        function hapusRow(id) { if(confirm("Hapus?")) document.getElementById(id).remove(); }
     </script>
 </body>
 </html>

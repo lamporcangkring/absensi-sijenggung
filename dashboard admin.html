@@ -65,20 +65,19 @@
             SIJENGGUNG ADM
         </div>
         <ul class="nav-menu">
-            <li class="nav-item active"><i data-lucide="layout-dashboard" size="20"></i> Dashboard</li>
-            <li class="nav-item"><i data-lucide="users" size="20"></i> Data Perangkat</li>
-            <li class="nav-item"><i data-lucide="clock" size="20"></i> Pengaturan Jam</li>
-            <li class="nav-item"><i data-lucide="file-text" size="20"></i> Laporan Rekap</li>
-            <li class="nav-item"><i data-lucide="settings" size="20"></i> Konfigurasi Sistem</li>
+            <li class="nav-item active" onclick="window.location.href='dashboard admin.html'"><i data-lucide="layout-dashboard" size="20"></i> Dashboard</li>
+            <li class="nav-item" onclick="window.location.href='data perangkat.html'"><i data-lucide="users" size="20"></i> Data Perangkat</li>
+            <li class="nav-item" onclick="window.location.href='pengaturan jam.html'"><i data-lucide="clock" size="20"></i> Pengaturan Jam</li>
+            <li class="nav-item" onclick="window.location.href='laporan rekap.html'"><i data-lucide="file-text" size="20"></i> Laporan Rekap</li>
         </ul>
-        <div class="nav-item" style="margin-top: auto; color: #ef4444;"><i data-lucide="log-out" size="20"></i> Keluar</div>
+        <div class="nav-item" style="margin-top: auto; color: #ef4444;" onclick="handleLogout()"><i data-lucide="log-out" size="20"></i> Keluar</div>
     </aside>
 
     <main class="main-content">
         <div class="header">
             <div>
                 <h1>Ringkasan Kehadiran</h1>
-                <p style="opacity: 0.6;">Kamis, 26 Maret 2026</p>
+                <p id="currentDateDisplay" style="opacity: 0.6;">Kamis, 26 Maret 2026</p>
             </div>
             <button class="btn-primary" onclick="alert('Mengekspor Rekap ke Excel...')">
                 <i data-lucide="download" size="16"></i> Cetak Laporan
@@ -86,9 +85,9 @@
         </div>
 
         <div class="stats-grid">
-            <div class="card"><h4>Total Perangkat</h4><h2>12</h2></div>
-            <div class="card"><h4>Hadir Hari Ini</h4><h2>10</h2></div>
-            <div class="card"><h4>Terlambat</h4><h2 style="color: #f59e0b;">2</h2></div>
+            <div class="card"><h4>Total Perangkat</h4><h2>--</h2></div>
+            <div class="card"><h4>Hadir Hari Ini</h4><h2>--</h2></div>
+            <div class="card"><h4>Terlambat</h4><h2 style="color: #f59e0b;">0</h2></div>
             <div class="card"><h4>Izin/Sakit</h4><h2>0</h2></div>
         </div>
 
@@ -98,15 +97,15 @@
                 <hr style="margin: 15px 0; opacity: 0.1;">
                 <div class="input-group">
                     <label>Jam Masuk</label>
-                    <input type="time" value="07:30">
+                    <input type="time" id="jamMasuk" value="07:30">
                 </div>
                 <div class="input-group">
                     <label>Toleransi (Menit)</label>
-                    <input type="number" value="15">
+                    <input type="number" id="toleransi" value="15">
                 </div>
                 <div class="input-group">
                     <label>Jam Pulang</label>
-                    <input type="time" value="15:30">
+                    <input type="time" id="jamPulang" value="15:30">
                 </div>
                 <button class="btn-primary" style="width: 100%;" onclick="alert('Pengaturan Berhasil Disimpan!')">Update Aturan</button>
             </div>
@@ -122,24 +121,9 @@
                             <th>Aksi</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="logPresensiBody">
                         <tr>
-                            <td>Budi Santoso</td>
-                            <td>07:15:22</td>
-                            <td><span class="badge bg-success">Tepat Waktu</span></td>
-                            <td><i data-lucide="eye" size="16" style="cursor:pointer"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Siti Aminah</td>
-                            <td>07:46:10</td>
-                            <td><span class="badge bg-warning">Terlambat</span></td>
-                            <td><i data-lucide="eye" size="16" style="cursor:pointer"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Agus Prayitno</td>
-                            <td>07:20:05</td>
-                            <td><span class="badge bg-success">Tepat Waktu</span></td>
-                            <td><i data-lucide="eye" size="16" style="cursor:pointer"></i></td>
+                            <td colspan="4" style="text-align:center">Memuat data...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -147,8 +131,53 @@
         </div>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/main.js"></script>
     <script>
-        lucide.createIcons();
+        // Jalankan saat halaman dimuat
+        window.addEventListener('load', async () => {
+            const user = checkSession();
+            if (user && user.role === 'admin') {
+                setTodayDate();
+                updateDashboardStats();
+                // Opsional: Load log presensi terbaru
+                loadRecentLogs();
+            } else if (user) {
+                // Jika bukan admin tapi login, lempar ke profil
+                window.location.href = 'profil.html';
+            }
+        });
+
+        async function loadRecentLogs() {
+            const today = new Date().toISOString().split('T')[0];
+            const { data, error } = await sb_client
+                .from('presensi')
+                .select('*, perangkat(nama)')
+                .eq('tanggal', today)
+                .order('jam_masuk', { ascending: false })
+                .limit(5);
+
+            const tbody = document.getElementById('logPresensiBody');
+            if (error || !data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Belum ada data hadir hari ini.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach(log => {
+                const statusClass = log.status === 'Tepat Waktu' ? 'bg-success' : 'bg-warning';
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td>${log.perangkat.nama}</td>
+                        <td>${log.jam_masuk}</td>
+                        <td><span class="badge ${statusClass}">${log.status}</span></td>
+                        <td><i data-lucide="eye" size="16" style="cursor:pointer"></i></td>
+                    </tr>
+                `);
+            });
+            lucide.createIcons();
+        }
     </script>
+
 </body>
 </html>

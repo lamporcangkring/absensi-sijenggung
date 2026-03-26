@@ -87,124 +87,95 @@
 
 <div class="app-container">
 
-    <div id="beranda" class="page active">
-        <h2 style="margin-bottom: 20px;">Halo, Budi!</h2>
-        <div style="background: var(--primary); padding: 20px; border-radius: 24px; margin-bottom: 20px;">
-            <p style="font-size: 12px; opacity: 0.8;">Kehadiran Pekan Ini</p>
-            <h1 style="font-size: 32px;">95%</h1>
-        </div>
-    </div>
-
-    <div id="riwayat" class="page">
+    <div id="riwayat" class="page active">
         <div class="history-header">
             <h3>Riwayat Absensi</h3>
             <div class="month-selector">
-                Maret 2026 <i data-lucide="chevron-down" size="14"></i>
+                <span id="currentMonth">Maret 2026</span> <i data-lucide="chevron-down" size="14"></i>
             </div>
         </div>
 
-        <div class="history-list">
-            <div class="history-card">
-                <div class="date-box">
-                    <div class="day-num"><span>Kam</span><span>26</span></div>
-                    <div class="time-info">
-                        <h5>07:15 - 15:30</h5>
-                        <p>Kantor Desa Sijenggung</p>
-                    </div>
-                </div>
-                <div class="status-badge status-hadir">Hadir</div>
-            </div>
-            <div class="history-card">
-                <div class="date-box">
-                    <div class="day-num"><span>Rab</span><span>25</span></div>
-                    <div class="time-info">
-                        <h5>07:45 - 15:35</h5>
-                        <p>Kantor Desa Sijenggung</p>
-                    </div>
-                </div>
-                <div class="status-badge status-telat">Telat</div>
-            </div>
-            <div class="history-card">
-                <div class="date-box">
-                    <div class="day-num"><span>Sel</span><span>24</span></div>
-                    <div class="time-info">
-                        <h5>07:10 - 15:40</h5>
-                        <p>Kantor Desa Sijenggung</p>
-                    </div>
-                </div>
-                <div class="status-badge status-hadir">Hadir</div>
-            </div>
-            <div class="history-card">
-                <div class="date-box">
-                    <div class="day-num"><span>Sen</span><span>23</span></div>
-                    <div class="time-info">
-                        <h5>--:-- - --:--</h5>
-                        <p>Izin Sakit</p>
-                    </div>
-                </div>
-                <div class="status-badge status-izin">Izin</div>
-            </div>
-        </div>
-    </div>
-
-    <div id="absensi" class="page">
-        <h3 style="text-align: center; margin-bottom: 20px;">Ambil Presensi</h3>
-        <div style="width: 100%; aspect-ratio:1; background:#000; border-radius:30px; position:relative; overflow:hidden;">
-            <video id="video" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
-            <div style="position:absolute; top:0; width:100%; height:2px; background:var(--accent); box-shadow:0 0 10px var(--accent); animation: scan 3s infinite;"></div>
-        </div>
-        <button onclick="alert('Absen Berhasil!')" style="width:100%; margin-top:20px; padding:18px; border-radius:20px; background:var(--primary); color:white; border:none; font-weight:700;">ABSEN SEKARANG</button>
-    </div>
-
-    <div id="profil" class="page">
-        <div style="text-align:center; padding:20px;">
-            <div style="width:80px; height:80px; background:var(--glass); border-radius:50%; margin: 0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:30px; border:2px solid var(--accent);">👤</div>
-            <h4>Budi Santoso</h4>
-            <p style="font-size:12px; opacity:0.6;">Kaur Keuangan</p>
+        <div class="history-list" id="historyList">
+            <div style="text-align:center; padding: 40px; opacity:0.5;">Memuat riwayat...</div>
         </div>
     </div>
 
     <div class="nav-dock">
-        <div class="nav-btn active" onclick="showPage('beranda', this)">
+        <div class="nav-btn" onclick="window.location.href='beranda.html'">
             <i data-lucide="home"></i><br>Beranda
         </div>
-        <div class="nav-btn" onclick="showPage('riwayat', this)">
+        <div class="nav-btn active" onclick="window.location.href='riwayat.html'">
             <i data-lucide="calendar"></i><br>Riwayat
         </div>
         
-        <div class="floating-action" onclick="showPage('absensi', this)">
+        <div class="floating-action" onclick="window.location.href='absen camera.html'">
             <i data-lucide="camera" size="30"></i>
         </div>
 
-        <div class="nav-btn" style="margin-left: 60px;" onclick="showPage('pesan', this)">
+        <div class="nav-btn" style="margin-left: 60px;" onclick="window.location.href='pesan.html'">
             <i data-lucide="message-circle"></i><br>Pesan
         </div>
-        <div class="nav-btn" onclick="showPage('profil', this)">
+        <div class="nav-btn" onclick="window.location.href='profil.html'">
             <i data-lucide="user"></i><br>Profil
         </div>
     </div>
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/main.js"></script>
 <script>
-    lucide.createIcons();
+    window.addEventListener('load', async () => {
+        const user = checkSession();
+        if (user) {
+            loadHistory(user.id);
+            
+            const now = new Date();
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            document.getElementById('currentMonth').textContent = `${months[now.getMonth()]} ${now.getFullYear()}`;
+        }
+    });
 
-    function showPage(id, btn) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(btn && btn.classList.contains('nav-btn')) btn.classList.add('active');
-        if(id === 'absensi') startCam();
-    }
+    async function loadHistory(perangkatId) {
+        const { data, error } = await sb_client
+            .from('presensi')
+            .select('*')
+            .eq('perangkat_id', perangkatId)
+            .order('tanggal', { ascending: false })
+            .limit(30);
 
-    async function startCam() {
-        const video = document.getElementById('video');
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-            video.srcObject = stream;
-        } catch (e) { console.log("Kamera error"); }
+        const list = document.getElementById('historyList');
+        if (error || !data || data.length === 0) {
+            list.innerHTML = '<div style="text-align:center; padding: 40px; opacity:0.5;">Belum ada riwayat absensi.</div>';
+            return;
+        }
+
+        list.innerHTML = '';
+        const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+        data.forEach(log => {
+            const dateObj = new Date(log.tanggal);
+            const dayName = days[dateObj.getDay()];
+            const dayNum = dateObj.getDate();
+            const statusClass = log.status === 'Tepat Waktu' ? 'status-hadir' : 'status-telat';
+
+            list.insertAdjacentHTML('beforeend', `
+                <div class="history-card">
+                    <div class="date-box">
+                        <div class="day-num"><span>${dayName}</span><span>${dayNum}</span></div>
+                        <div class="time-info">
+                            <h5>${log.jam_masuk} - --:--</h5>
+                            <p>Kantor Desa Sijenggung</p>
+                        </div>
+                    </div>
+                    <div class="status-badge ${statusClass}">${log.status}</div>
+                </div>
+            `);
+        });
+        lucide.createIcons();
     }
 </script>
+
 
 <style> @keyframes scan { 0%, 100% { top: 0%; } 50% { top: 100%; } } </style>
 </body>

@@ -283,9 +283,9 @@
                     <i data-lucide="user"></i>
                 </div>
                 <div class="user-info">
-                    <h2>BUDI SANTOSO</h2>
-                    <p>Kaur Keuangan</p>
-                    <p>NIPD: 198501222011011003</p>
+                    <h2 id="userName">--</h2>
+                    <p id="userJabatan">--</p>
+                    <p id="userNIPD">NIPD: --</p>
                 </div>
             </div>
 
@@ -295,16 +295,16 @@
                 <div class="no-camera-msg">[ KAMERA BELUM AKTIF / PERLU IZIN ]</div>
                 <div class="location-tag">
                     <i data-lucide="map-pin" size="12" style="vertical-align: middle;"></i>
-                    GPS: -7.3695, 109.6812 (Kantor Desa Sijenggung)
+                    GPS: -7.3821, 109.6583 (Kantor Desa Sijenggung)
                 </div>
             </div>
 
             <div class="gps-status">
-                <i data-lucide="check-circle" size="18"></i>
-                LOKASI AMAN: DALAM AREA KANTOR
+                <i data-lucide="loader" class="animate-spin" size="18"></i>
+                MENCARI LOKASI...
             </div>
 
-            <button class="btn-absensi" id="absensiButton">AMBIL FOTO & ABSEN MASUK</button>
+            <button class="btn-absensi" id="absensiButton" disabled>MENCARI LOKASI...</button>
 
             <div class="recap-section">
                 <div class="recap-header">
@@ -317,85 +317,125 @@
                     </div>
                     <div class="recap-item">
                         <span>Waktu Masuk</span>
-                        <strong>07:15:22 WIB</strong>
+                        <strong id="waktuMasuk">--:--:--</strong>
                     </div>
                     <div class="recap-item">
                         <span>Status</span>
-                        <strong style="color: var(--success-green)">Tepat Waktu</strong>
+                        <strong id="statusAbsen">--</strong>
                     </div>
                 </div>
             </div>
         </main>
 
         <nav class="bottom-nav">
-            <a href="#" class="nav-item active">
+            <a href="beranda.html" class="nav-item">
                 <i data-lucide="home" size="18"></i>Beranda
             </a>
-            <a href="#" class="nav-item">
-                <i data-lucide="clipboard-list" size="18"></i>Rekap
+            <a href="absen camera.html" class="nav-item active">
+                <i data-lucide="camera" size="18"></i>Absen
             </a>
-            <a href="#" class="nav-item">
+            <a href="riwayat.html" class="nav-item">
+                <i data-lucide="history" size="18"></i>Riwayat
+            </a>
+            <a href="profil.html" class="nav-item">
                 <i data-lucide="user-cog" size="18"></i>Profil
-            </a>
-            <a href="#" class="nav-item">
-                <i data-lucide="bell" size="18"></i>Notifikasi
             </a>
         </nav>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/main.js"></script>
 <script>
-    // --- 1. INISIALISASI IKON ---
-    lucide.createIcons();
+    window.addEventListener('load', async () => {
+        const user = checkSession();
+        if (user) {
+            // Update User UI
+            document.getElementById('userName').textContent = user.nama.toUpperCase();
+            document.getElementById('userJabatan').textContent = user.jabatan;
+            document.getElementById('userNIPD').textContent = 'NIPD: ' + user.nipd;
 
-    // --- 2. LOGIKA KAMERA LIVE (FULL SEKALI JALAN) ---
-    async function initCamera() {
-        const video = document.getElementById('webcam');
-        const errorMsg = document.querySelector('.no-camera-msg');
-        
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "user" }, // Minta kamera depan
-                audio: false 
-            });
-            video.srcObject = stream;
-            // Jika berhasil, hilangkan pesan "Kamera belum aktif"
-            if (errorMsg) errorMsg.style.display = 'none';
-        } catch (err) {
-            console.error("Gagal akses kamera: ", err);
-            if (errorMsg) {
-                errorMsg.innerHTML = '<span style="color: var(--error-red)">Gagal akses kamera.<br>Pastikan izin diberikan & browser mendukung (HTTPS).</span>';
-            }
-            alert("Harap berikan izin kamera agar absensi bisa dilakukan secara live.");
+            setTodayDate();
+            initCamera();
+            checkLocation();
+            loadTodayAttendance(user.id);
+        }
+    });
+
+    async function loadTodayAttendance(perangkatId) {
+        const today = new Date().toISOString().split('T')[0];
+        const { data, error } = await sb_client
+            .from('presensi')
+            .select('*')
+            .eq('perangkat_id', perangkatId)
+            .eq('tanggal', today)
+            .single();
+
+        if (data) {
+            document.getElementById('waktuMasuk').textContent = data.jam_masuk + ' WIB';
+            const statusEl = document.getElementById('statusAbsen');
+            statusEl.textContent = data.status;
+            statusEl.style.color = data.status === 'Tepat Waktu' ? 'var(--success-green)' : 'var(--error-red)';
+            
+            const btn = document.getElementById('absensiButton');
+            btn.disabled = true;
+            btn.textContent = 'SUDAH ABSEN HARI INI';
+            btn.style.background = '#ccc';
         }
     }
 
-    // --- 3. LOGIKA TANGGAL HARI INI (FUL REKAP) ---
-    function setTodayDate() {
+    document.getElementById('absensiButton').addEventListener('click', async () => {
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        if (!user) return;
+
         const now = new Date();
-        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        
-        const day = days[now.getDay()];
-        const date = now.getDate();
-        const month = months[now.getMonth()];
-        const year = now.getFullYear();
-        
-        const formattedDate = `${day}, ${date} ${month} ${year}`;
-        document.getElementById('currentDateDisplay').textContent = formattedDate;
-    }
+        const jam = now.getHours().toString().padStart(2, '0');
+        const menit = now.getMinutes().toString().padStart(2, '0');
+        const detik = now.getSeconds().toString().padStart(2, '0');
+        const jamMasukStr = `${jam}:${menit}:${detik}`;
+        const tanggal = now.toISOString().split('T')[0];
 
-    // --- 4. LOGIKA TOMBOL ABSENSI ---
-    document.getElementById('absensiButton').addEventListener('click', () => {
-        alert("SIMULASI: Foto berhasil diambil dan divalidasi dengan GPS. Data absensi sedang dikirim ke server Desa Sijenggung.");
+        // Ambil aturan jam masuk dari database
+        const { data: config } = await sb_client
+            .from('config')
+            .select('jam_masuk, toleransi')
+            .eq('id', 1)
+            .single();
+
+        let status = 'Tepat Waktu';
+        if (config && config.jam_masuk) {
+            const [hConfig, mConfig] = config.jam_masuk.split(':').map(Number);
+            const limit = new Date(now);
+            limit.setHours(hConfig, mConfig + (parseInt(config.toleransi) || 0), 0);
+            
+            if (now > limit) {
+                status = 'Terlambat';
+            }
+        } else {
+            // Fallback manual jika config tidak ada
+            if (now.getHours() > 7 || (now.getHours() === 7 && now.getMinutes() > 45)) {
+                status = 'Terlambat';
+            }
+        }
+
+        const { error } = await sb_client
+            .from('presensi')
+            .insert([{
+                perangkat_id: user.id,
+                tanggal: tanggal,
+                jam_masuk: jamMasukStr,
+                status: status
+            }]);
+
+        if (error) {
+            alert('Gagal simpan absensi: ' + error.message);
+        } else {
+            alert('Absensi Berhasil Disimpan!');
+            location.reload();
+        }
     });
-
-    // --- 5. RUNTIME INISIALISASI ---
-    window.onload = () => {
-        setTodayDate();
-        initCamera();
-    };
 </script>
+
 
 </body>
 </html>

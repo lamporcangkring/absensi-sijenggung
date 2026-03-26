@@ -89,8 +89,8 @@
 <div class="app-container">
     <div class="profile-hero">
         <div class="avatar-circle">👤</div>
-        <h2>Budi Santoso</h2>
-        <p style="opacity: 0.7; font-size: 14px;">Kaur Keuangan • Sijenggung</p>
+        <h2 id="profileName">--</h2>
+        <p id="profileJabatan" style="opacity: 0.7; font-size: 14px;">-- • Sijenggung</p>
     </div>
 
     <div class="section-label">Data Perangkat</div>
@@ -99,21 +99,21 @@
             <i data-lucide="user" size="18"></i>
             <div class="label-group">
                 <span class="label-text">Nama Lengkap</span>
-                <span class="val-text">Budi Santoso</span>
+                <span id="valNama" class="val-text">--</span>
             </div>
         </div>
         <div class="menu-row">
             <i data-lucide="mail" size="18"></i>
             <div class="label-group">
-                <span class="label-text">Email</span>
-                <span class="val-text">budi@sijenggung.desa.id</span>
+                <span class="label-text">Jabatan</span>
+                <span id="valJabatan" class="val-text">--</span>
             </div>
         </div>
         <div class="menu-row" style="opacity: 0.6;">
             <i data-lucide="credit-card" size="18"></i>
             <div class="label-group">
                 <span class="label-text">NIPD (Terkunci)</span>
-                <span class="val-text">198501222011011003</span>
+                <span id="valNIPD" class="val-text">--</span>
             </div>
             <i data-lucide="lock" size="14"></i>
         </div>
@@ -121,37 +121,47 @@
 
     <div class="section-label">Keamanan</div>
     <div class="menu-list">
-        <div class="menu-row" style="cursor: pointer;">
-            <i data-lucide="key" size="18"></i>
+        <div class="menu-row" style="cursor: pointer;" onclick="handleLogout()">
+            <i data-lucide="log-out" size="18" style="color: #ef4444;"></i>
             <div class="label-group">
-                <span class="val-text">Ganti Password</span>
+                <span class="val-text" style="color: #ef4444;">Keluar Aplikasi</span>
             </div>
             <i data-lucide="chevron-right" size="18"></i>
         </div>
     </div>
 
     <div class="nav-dock">
-        <div class="nav-item">
+        <div class="nav-item" onclick="window.location.href='beranda.html'">
             <i data-lucide="home"></i><br>Beranda
         </div>
-        <div class="nav-item">
+        <div class="nav-item" onclick="window.location.href='riwayat.html'">
             <i data-lucide="calendar"></i><br>Riwayat
         </div>
-        <div class="floating-btn">
+        <div class="floating-btn" onclick="window.location.href='absen camera.html'">
             <i data-lucide="camera" size="28"></i>
         </div>
-        <div class="nav-item">
+        <div class="nav-item" onclick="window.location.href='pesan.html'">
             <i data-lucide="message-square"></i><br>Pesan
         </div>
-        <div class="nav-item active">
+        <div class="nav-item active" onclick="window.location.href='profil.html'">
             <i data-lucide="user"></i><br>Profil
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/main.js"></script>
 <script>
-    // Menjalankan Icon
-    lucide.createIcons();
+    window.addEventListener('load', () => {
+        const user = checkSession();
+        if (user) {
+            document.getElementById('profileName').textContent = user.nama;
+            document.getElementById('profileJabatan').textContent = user.jabatan + ' • Sijenggung';
+            document.getElementById('valNama').textContent = user.nama;
+            document.getElementById('valJabatan').textContent = user.jabatan;
+            document.getElementById('valNIPD').textContent = user.nipd;
+        }
+    });
 </script>
 
 </body>
