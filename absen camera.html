@@ -26,6 +26,7 @@
             align-items: center; 
             min-height: 100vh;
             padding: 20px;
+            margin: 0;
         }
 
         /* Smartphone Frame */
@@ -39,6 +40,7 @@
             position: relative;
             overflow: hidden;
             border: 2px solid #555;
+            transition: 0.3s;
         }
 
         /* Screen content area */
@@ -51,6 +53,19 @@
             position: relative;
             display: flex;
             flex-direction: column;
+        }
+
+        /* --- Responsiveness --- */
+        @media (max-width: 480px) {
+            body { padding: 0; background: var(--bg-light); }
+            .phone-frame { 
+                width: 100vw; 
+                height: 100vh; 
+                border-radius: 0; 
+                padding: 0; 
+                border: none; 
+            }
+            .app-container { border-radius: 0; }
         }
 
         /* --- Header Section --- */
